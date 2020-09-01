@@ -113,6 +113,7 @@ class Deck {
         //take card - takes card and adds it to the hand
         //checkMoney - checks if players money is higher than input value
         //bet - passed minimum bet, has the player select a bet, returns nothing  
+        //betLost - Subtracts bet from the total chips
         //checkAce - checks for ace if so sets value to true
         //check - to see if the player has gone over and will do special stuff when an ace is in hand and will return new points if over changes continue to false and bust to true
         //hit - adds a card to the player hand 
@@ -169,10 +170,16 @@ class Player {
         this.lose = false;
     }
 
-    takeCard(card){
-        this.hand.push(card);
+    takeCard(deck){
+        this.hand.push(deck.removeCard());
+        //transition to hand i think would happen here  
     }
 
+    checkChips(){
+        
+    }
+
+    //not complete not even close 
     check(){
         this.points = this.hand[0].valueOf() + this.hand[1].valueOf();
 
