@@ -167,17 +167,62 @@ class Player {
         this.bust = false;
         this.win = false;
         this.tie = false;
-        this.lose = false;
     }
 
     takeCard(deck){
         this.hand.push(deck.removeCard());
         //transition to hand i think would happen here  
     }
-
-    checkChips(){
-        
+//
+    checkChips(num = 25){
+        if (this.chips >= num){ //added equals
+            return true;
+        } else if(this.chips < 25) {
+            this.outOfMoney = true; //changed to out of money 
+            
+        }
+        return false;
     }
+    
+    makeBet(num){
+
+        let done = false; 
+        //css stuff mostly
+        const select25 = () => {
+            this.bet += 25;
+        }
+        const select50 = () => {
+            this.bet += 50;
+        }
+        const select100 = () => {
+            this.bet += 100;
+        }
+        const makebet = () => {
+            if (this.bet >= num && this.checkChips(this.bet)){
+                done = true;
+            }else if(!this.checkChips(this.bet)){
+                alert(`${this.name} doesn't have enough chips for that bet`);
+                
+
+            }else {
+                alert(`${this.name} hasn't met the required bet`);
+            }
+        }
+        while(!done){
+            //make buttons appear and work
+            done = true;
+        }
+        this.bet = num; //only for testing
+    }
+
+    betLost(){
+        this.chips -= this.bet;
+    }
+    checkAce(){
+        if (this.hand[0].value === 'A'||this.hand[1].value ==='A') return true;
+        return false;
+    }
+
 
     //not complete not even close 
     check(){
@@ -196,8 +241,9 @@ class Player {
         //methods
         //constructor
             //takes in number of players and number of decks 
-        //initialize round - calls initilizePlayer, calls playerBet for each player 
-        //compair - loop through players if bust is false compair to dealer, if highr win true, if lower lose true, if tie tie true. 
+            //initialize round - calls initilizePlayer, calls playerBet for each player 
+            //compair - loop through players if bust is false compair to dealer, if highr win true, if lower lose true, if tie tie true. 
+        //checkPlayersMoney - loop to check all player money at end of the round (maybe)
         //distribute - loop through players if win double bet to player, if tie return bet to player, if bust or lose do nothing if outOfMoney is true then the player is out and something will happen  
         //playerPlay - while player continue is true offer to hit or stay and stuff and hold the jquery for the buttons
         //split - will run play loop for player twice 
