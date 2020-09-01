@@ -37,7 +37,7 @@ class Card  {
         //constructor 
             //makes deck and depending on input will make multiple decks
         //add to discard 
-        //moveDisCards (unless i use a shuffle that don't need this)
+        //moveDisCards (unless i use a shuffle that don't need this) //dont need it!
         //shuffle
         //checkCardsSize - if empty moveDisCards shuffle
         //remove card will checkCardsSize(>=1) and return the card removed 
@@ -74,7 +74,15 @@ class Deck {
         }
         
     }
+    checkCardsSize(){
+        if (this.cards.length < 1){
+            this.shuffle();
+        }
+    }
 
+    removeCard(){
+        return this.cards.shift();
+    }
 
 }
         
