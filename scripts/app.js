@@ -3,7 +3,7 @@ const values = ["2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K", "A"]
 const suits = ["d", "c", "h", "s"];
 //card class
     //value string 
-    //suit  string
+    //suit  string 
     //faceUp boolean
     //methods
         //constructor takes cards info sets face up to false 
@@ -46,9 +46,11 @@ class Deck {
     constructor(n = 1){
         this.cards = [];
         this.discards = [];
-        for(let i = 0; i < suits.length; i++){
-            for(let j = 0; j < values.length; j++){
-                    this.discards.push(new Card(values[j],suits[i]));
+        for(let j = 0; j < n; j++){
+            for(let i = 0; i < suits.length; i++){
+                for(let j = 0; j < values.length; j++){
+                        this.discards.push(new Card(values[j],suits[i]));
+                }
             }
         }
     }
@@ -75,7 +77,7 @@ class Deck {
         
     }
     checkCardsSize(){
-        if (this.cards.length < 1){
+        if (this.cards.length < 1){  //not tested but thats ok ill doit later should work anyway
             this.shuffle();
         }
     }
@@ -106,20 +108,21 @@ class Deck {
     //outOfMoney
     //methods
         //constructor
-            //takes name num(for money) sets all initial values doy
-        //check - to see if the player has gone over and will do special stuff when an ace is in hand and will return new points if over changes continue to false and bust to true
-        //hit - adds a card to the player hand 
-        //stand - changes continue to false 
+            //takes name num(for money) sets all initial values doy 
+        //initializePlayer - sets player's continue to true, win, lose, bust, tie, hasAce, bust, canDouble and canSplit to false
+        //take card - takes card and adds it to the hand
         //checkMoney - checks if players money is higher than input value
         //bet - passed minimum bet, has the player select a bet, returns nothing  
         //checkAce - checks for ace if so sets value to true
+        //check - to see if the player has gone over and will do special stuff when an ace is in hand and will return new points if over changes continue to false and bust to true
+        //hit - adds a card to the player hand 
+        //stand - changes continue to false 
         //checkDoubleDown - looks at players hand to see if they can double down and sets value to true if so sets canDouble to true
         //checkNatural - checks for blackjack or natural (21 without a jack is the way i think of it)
         //doubleDown - double players bet hit once and set continue to false 
         //win - adds double players bet value and adds to chips
         //lose - delets players bet adds no money 
         //tie - returns bet money 
-        //initializePlayer - sets player's continue to true, win, lose, bust, tie, hasAce, bust, canDouble and canSplit to false, and
         //discardAll - will loop through hand and remove the cards at the end of the round
         
         //dealer class extends player
@@ -130,6 +133,55 @@ class Deck {
             //checkTenCard
             //check for dealer  
         
+class Player {
+    constructor(name = "PunchParty",chips = 500){
+        this.name = name;
+        this.hand = [];
+        this.bet = 0;
+        this.chips = chips;
+        this.points = 0;
+        this.continue = true;
+        this.hasAce = false;
+        this.canDouble = false;
+        this.canSplit = false;
+        this.didSplit = false;
+        this.didDouble = false;
+        this.hasNatural = false;
+        this.bust = false;
+        this.win = false;
+        this.tie = false;
+        this.lose = false;
+        this.outOfMoney = false;
+    }
+    initailizePlayer(){
+        this.bet = 0;
+        this.points = 0;  //dry
+        this.continue = true;
+        this.hasAce = false;
+        this.canDouble = false;
+        this.canSplit = false;
+        this.didSplit = false;
+        this.didDouble = false;
+        this.hasNatural = false;
+        this.bust = false;
+        this.win = false;
+        this.tie = false;
+        this.lose = false;
+    }
+
+    takeCard(card){
+        this.hand.push(card);
+    }
+
+    check(){
+        this.points = this.hand[0].valueOf() + this.hand[1].valueOf();
+
+    }
+
+
+}
+
+
         
         //game class 
         //minimum bet
