@@ -13,6 +13,23 @@ const suits = ["d", "c", "h", "s"];
         //I dont think I need either of these//changeAceOne - when needed this will switch the ace value to one 
         //changeAceBack - needs to be called if the first is, dont want to leave any aces at one (maybe dont need)
 
+class Card  {
+    constructor(value, suit){
+        this.value = value;
+        this.suit = suit;
+        this.faceUp = false;
+    }
+    flip(){
+        this.faceUp = !this.faceUp;
+    }
+    valueOf(){ 
+        const trueValues = {"2":2, "3":3, "4":4, "5":5, "6":6, "7":7, "8":8, "9":9, "T":10, "J":10, "Q":10, "K":10, "A":11}
+        return trueValues[this.value];
+    }
+}
+
+
+
 //deck class
     //cards array
     //discards anti-array
@@ -24,6 +41,42 @@ const suits = ["d", "c", "h", "s"];
         //shuffle
         //checkCardsSize - if empty moveDisCards shuffle
         //remove card will checkCardsSize(>=1) and return the card removed 
+
+class Deck {
+    constructor(n = 1){
+        this.cards = [];
+        this.discards = [];
+        for(let i = 0; i < suits.length; i++){
+            for(let j = 0; j < values.length; j++){
+                    this.discards.push(new Card(values[j],suits[i]));
+            }
+        }
+    }
+
+    addToDiscard(card){
+        this.discards.push(card)
+    }
+
+    //shuffle will be the fisher gates shuffle that puts it into a new array 
+    //Mike Bostock "https://bost.ocks.org/mike/shuffle/"
+    shuffle(){
+        
+        let n = this.discards.length, i;
+
+        // While there remain elements to shuffle…
+        while (n) {
+
+            // Pick a remaining element…
+            i = Math.floor(Math.random() * n--);
+            
+            // And move it to the new array.
+            this.cards.push(this.discards.splice(i, 1)[0]);
+        }
+        
+    }
+
+
+}
         
 //player class
     //name -string
