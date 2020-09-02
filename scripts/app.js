@@ -115,10 +115,11 @@ class Deck {
         //bet - passed minimum bet, has the player select a bet, returns nothing  
         //betLost - Subtracts bet from the total chips
         //checkAce - checks for ace if so sets value to true
+        //calculatePoints - adds up card values doesnt handle ace 
+        //checkDoubleDown - looks at players hand to see if they can double down and sets value to true if so sets canDouble to true will only be ran right after deal 
         //check - to see if the player has gone over and will do special stuff when an ace is in hand and will return new points if over changes continue to false and bust to true
         //hit - adds a card to the player hand 
         //stand - changes continue to false 
-        //checkDoubleDown - looks at players hand to see if they can double down and sets value to true if so sets canDouble to true
         //checkNatural - checks for blackjack or natural (21 without a jack is the way i think of it)
         //doubleDown - double players bet hit once and set continue to false 
         //win - adds double players bet value and adds to chips
@@ -141,6 +142,8 @@ class Player {
         this.bet = 0;
         this.chips = chips;
         this.points = 0;
+        this.aceCount = 0;
+        this.aceChangeCount = 0;
         this.continue = true;
         this.hasAce = false;
         this.canDouble = false;
@@ -151,12 +154,13 @@ class Player {
         this.bust = false;
         this.win = false;
         this.tie = false;
-        this.lose = false;
         this.outOfMoney = false;
     }
     initailizePlayer(){
         this.bet = 0;
         this.points = 0;  //dry
+        this.aceCount = 0;
+        this.aceChangeCount = 0;
         this.continue = true;
         this.hasAce = false;
         this.canDouble = false;
@@ -169,15 +173,16 @@ class Player {
         this.tie = false;
     }
 
-    takeCard(deck){
+    takeCard(deck, face = true){
         this.hand.push(deck.removeCard());
+        this.hand[this.hand.length - 1].faceUp = face;
         //transition to hand i think would happen here  
     }
 //
-    checkChips(num = 25){
+    checkChips(num = 25){ //need to check if the player hes enough to bet minimum 
         if (this.chips >= num){ //added equals
             return true;
-        } else if(this.chips < 25) {
+        } else if(this.chips < num) {
             this.outOfMoney = true; //changed to out of money 
             
         }
@@ -218,17 +223,56 @@ class Player {
     betLost(){
         this.chips -= this.bet;
     }
+    /*    
     checkAce(){
-        if (this.hand[0].value === 'A'||this.hand[1].value ==='A') return true;
+        if (this.hand[0].value === 'A'||this.hand[1].value ==='A'){
+            this.hasAce = true;
+            this.aceCount++;
+        }
+        
+    } */
+    checkAce(){
+        let counter = 0;
+        for(let i = 0; i < this.hand.length; i++){
+            if(this.hand[i].value === 'A') counter++;
+        }
+        this.aceCount = counter;
+        if(this.aceCount >= 1) this.hasAce = true;
+    }
+
+    calculatePoints(){
+        let counter = 0;
+        for(let i = 0; i < this.hand.length; i++){
+            counter+= this.hand[i].valueOf();
+        }
+        this.points = counter;
+        if(this.aceChangeCount >=1) this.points - 10*this.aceChangeCount;
+    }
+    checkNatural(){
+        if((this.hand[0].valueOf() === 10||this.hand[1].valueOf() === 10) && (this.hand[0].value === 'A' || this.hand[1].value === 'A')){ //could use check ace so its a little redundant 
+            this.hasNatural = true;
+            return true;
+        } 
         return false;
     }
-
-
-    //not complete not even close 
+    
     check(){
-        this.points = this.hand[0].valueOf() + this.hand[1].valueOf();
-
+        this.calculatePoints();
+        if(this.hasNatural) {
+            this.continue = false; 
+            return;
+        }
+        if(this.points > 21 && this.aceCount > this.aceChangeCount){
+            this.points -= 10;
+            this.aceChangeCount += 1;
+        }else if (this.points > 21){
+            this.continue = false;
+            this.bust = true;
+        }if (this.points === 21){
+            this.continue = false;
+        }
     }
+
 
 
 }
@@ -244,6 +288,7 @@ class Player {
             //initialize round - calls initilizePlayer, calls playerBet for each player 
             //compair - loop through players if bust is false compair to dealer, if highr win true, if lower lose true, if tie tie true. 
         //checkPlayersMoney - loop to check all player money at end of the round (maybe)
+        //checkPlayerHands - loop through player hands and check for all the stuff that can happen with 2 cards, for right after deal 
         //distribute - loop through players if win double bet to player, if tie return bet to player, if bust or lose do nothing if outOfMoney is true then the player is out and something will happen  
         //playerPlay - while player continue is true offer to hit or stay and stuff and hold the jquery for the buttons
         //split - will run play loop for player twice 
