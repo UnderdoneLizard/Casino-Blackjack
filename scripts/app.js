@@ -83,6 +83,7 @@ class Deck {
     }
 
     removeCard(){
+        this.checkCardsSize();
         return this.cards.shift();
     }
 
@@ -310,6 +311,7 @@ class Player {
         this.bet *= 2;
         this.continue = false;
         this.didDouble = true;
+        this.checkAll;
     }
 
     split(){
@@ -349,7 +351,7 @@ class Dealer extends Player{
 
     constructor(name = 'BeanMan'){
         super(name,5000000);
-        
+
     }
 }
 
