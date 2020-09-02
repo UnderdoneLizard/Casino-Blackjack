@@ -295,6 +295,7 @@ class Player {
     }
     finalCheck(game){
         this.checkChips(game.minBet, true);
+        console.log('thisworked maybe');
     }
 
     hit(deck){
@@ -390,16 +391,61 @@ class Dealer extends Player{
         //methods
         //constructor
             //takes in number of players and number of decks 
-            //initialize round - calls initilizePlayer, calls playerBet for each player 
-            
-        //checkPlayersMoney - loop to check all player money at end of the round (maybe) will go into the bottom one 
-        //checkPlayerHands - loop through player hands and check for all the stuff that can happen with 2 cards, for right after deal and run check
+        //initialize round - calls initilizePlayer, calls playerBet for each player 
+        //deal - loop through players and deal
+        //checkPlayerHands - loop through player hands and check for all the stuff that can happen with 2 cards, for right after deal and run check (runs begining check on all players )
+        //player final check - runs final check on all players 
+        //playerPlay - while player continue is true offer to hit or stay and stuff and hold the jquery for the buttons
         //compair - loop through players if bust is false compair to dealer, if highr win true, if lower lose true, if tie tie true. 
         //distribute - loop through players if win double bet to player, if tie return bet to player, if bust or lose do nothing if outOfMoney is true then the player is out and something will happen  
-        //playerPlay - while player continue is true offer to hit or stay and stuff and hold the jquery for the buttons
         //split - will run play loop for player twice 
         //play round - initializeRound dealer deals and the players play (loop through the players) compair and distribute at the end 
         //playGame - creates players and dealer and creats how ever many decks the user wants 
         
+class Game {
+    constructor(numPlay, numDeck = 1){
+        this.minBet = 25;
+        this.deck = new Deck(numDeck)
+        this.deck.shuffle();
+        this.dealer = new Dealer("StringCheese");
+        this.players = [];
+        if(numPlay > 3) numPlay = 3;
+        for(let i = 0; i < numPlay; i++){
+            this.players.push(new Player());
+        }
+    }
+    
+    initailizeRound(){
+        this.players.forEach(player =>{
+            player.initailizePlayer();
+            player.makeBet(this.minBet);
+        })
+        this.dealer.initailizePlayer();
+    }
+
+    deal(){
+        for(let i = 0; i < 2; i++){
+            this.players.forEach(player =>{
+                player.takeCard(this.deck);
+            })
+            if(i === 1) this.dealer.takeCard(this.deck, false);
+            else this.dealer.takeCard(this.deck);
+        }
+    }
+
+    playersFirstCheck(){
+        this.players.forEach(player =>{
+            player.checkBegining();
+        })
+        this.dealer.checkBegining();
+    }
+
+    playersLastCheck(){
+        this.players.forEach(player =>{
+            player.finalCheck(this);
+        })
+    }
+
+}
         
 
