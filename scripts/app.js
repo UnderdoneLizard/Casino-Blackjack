@@ -141,6 +141,7 @@ class Player {
         this.name = name;
         this.hand = [];
         this.bet = 0;
+        this.splitBet = 0;
         this.chips = chips;
         this.points = 0;
         this.aceCount = 0;
@@ -153,12 +154,15 @@ class Player {
         this.didDouble = false;
         this.hasNatural = false;
         this.bust = false;
-        this.win = false;
+        this.won = false;
+        this.naturalWin = false;
+        this.lost = false;
         this.tie = false;
         this.outOfMoney = false;
     }
     initailizePlayer(){
         this.bet = 0;
+        this.splitbet = 0;
         this.points = 0;  //dry
         this.aceCount = 0;
         this.aceChangeCount = 0;
@@ -170,7 +174,9 @@ class Player {
         this.didDouble = false;
         this.hasNatural = false;
         this.bust = false;
-        this.win = false;
+        this.won = false;
+        this.naturalWin = false;
+        this.lost = false;
         this.tie = false;
     }
 
@@ -271,7 +277,7 @@ class Player {
     }
     
     check(){ // decides if the player has busted and deals with changing the ace 
-        this.checkAce
+        this.checkAce();
         this.calculatePoints();
         if(this.hasNatural) {
             this.continue = false; 
@@ -320,6 +326,7 @@ class Player {
     split(){
         this.didSplit = true;
         this.canSplit = false;
+        this.splitBet = this.bet;
     }
     //win - adds double players bet value and adds to chips
     win(){
@@ -371,6 +378,7 @@ class Dealer extends Player{
         super.check();
     }
     dealerPlay(deck){
+        this.hand[1].faceUp = true;
         while(this.continue === true){
             if(this.points < 17){ 
                 this.hit(deck);
@@ -446,6 +454,61 @@ class Game {
         })
     }
 
+    playersPlay(){
+        this.players.forEach(player =>{
+            while(player.continue = true){
+                //press buttons
+                console.log("players play was called");
+                player.continue = false
+            }
+        })
+        this.dealer.dealerPlay();
+    }
+    alldiscard(){
+        this.players.forEach(player =>{
+            player.discards(this.deck);
+        })
+        this.dealer.discards(this.deck);
+    }
+    
+    compair(){
+        this.players.forEach(player => {
+            if (player.bust){
+                player.lost = true;
+                console.log('dealer wins');
+                return;
+            }
+            if(player.hasNatural && !this.dealer.hasNatural){
+                player.naturalWin = true;
+                console.log('player wins');
+                return;
+            }
+            if(player.points > this.dealer.points || this.dealer.bust){
+                player.won = true;
+                console.log('player wins');
+            }else if (player.points < this.dealer.points && !this.dealer.bust){
+                player.lost = true;
+                console.log('dealer wins');
+            }else if (player.points === this.dealer.points){
+                player.tie = true;
+                console.log('Push');
+            }
+        })
+    }
+
+    distribute(){
+        this.players.forEach(player => {
+            if(player.naturalWin){
+                player.natWin();
+            }else if (player.won){
+                player.win();
+            }else if (player.tie){
+                console.log('really nothing needs to happen it seems');
+            }else if (player.lost){
+                player.lose();
+            }else console.log('how did i get here');
+        })
+    }
 }
         
 
