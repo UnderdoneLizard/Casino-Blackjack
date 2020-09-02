@@ -184,11 +184,11 @@ class Player {
         //probably css animation 
     }
 
-    checkChips(num = 25){ //need to check if the player hes enough to bet minimum 
+    checkChips(num = 25, willLose = false){ //need to check if the player hes enough to bet minimum 
         if (this.chips >= num){ //added equals
             return true;
         } else if(this.chips < num) {
-            this.outOfMoney = true; 
+            this.outOfMoney = willLose; 
             
         }
         return false;
@@ -207,7 +207,7 @@ class Player {
         const select100 = () => {
             this.bet += 100;
         }
-        const makebet = () => {
+        const finishbet = () => {
             if (this.bet >= num && this.checkChips(this.bet)){
                 done = true;
             }else if(!this.checkChips(this.bet)){
@@ -247,7 +247,7 @@ class Player {
 
     checkDouble(){
         const total = this.hand[0].valueOf() + this.hand[1].valueOf();
-        if(total === 9 || total === 10 || total === 11) this.canDouble = true;
+        if((total === 9 || total === 10 || total === 11) && (this.checkChips(2 * this.bet))) this.canDouble = true;
     }
 
     checkSplit(){
@@ -270,7 +270,8 @@ class Player {
         return false;
     }
     
-    check(){
+    check(){ // decides if the player has busted and deals with changing the ace 
+        this.checkAce
         this.calculatePoints();
         if(this.hasNatural) {
             this.continue = false; 
@@ -286,14 +287,14 @@ class Player {
             this.continue = false;
         }
     }
-    checkAll(game = 'platipus'){
-        this.checkAce();
+    checkBegining(){
         this.checkDouble();
         this.checkSplit();
         this.checkNatural();
         this.check();
-        this.checkChips();
-       // this.checkChips(game.minBet);
+    }
+    finalCheck(game){
+        this.checkChips(game.minBet, true);
     }
 
     hit(deck){
@@ -311,11 +312,13 @@ class Player {
         this.bet *= 2;
         this.continue = false;
         this.didDouble = true;
-        this.checkAll;
+        this.check();
+
     }
 
     split(){
         this.didSplit = true;
+        this.canSplit = false;
     }
     //win - adds double players bet value and adds to chips
     win(){
@@ -344,15 +347,38 @@ class Player {
             //constructor takes nothing 
                 //super infinant money and a rediculous name 
                 //hasTencard boolean
-            //deal - takes players array loops twice a loop that loops players cards into hand 
+            //deal - takes players array loops twice a loop that loops players cards into hand - going elsewhere
+            //dealer initailize
             //checkTenCard
-            //check for dealer  
+            //dealerPlay
 class Dealer extends Player{
 
     constructor(name = 'BeanMan'){
         super(name,5000000);
-
+        this.hasFirstTenCard = false;
     }
+    initailizePlayer(){
+        super.initailizePlayer()
+        this.hasFirstTenCard = false;
+    }
+    checkTenCard(){
+        if(this.hand[0].valueOf() === 10) this.hasFirstTenCard = true;
+    }
+    checkBegining(){
+        super.checkNatural();
+        this.checkTenCard();
+        super.check();
+    }
+    dealerPlay(deck){
+        while(this.continue === true){
+            if(this.points < 17){ 
+                this.hit(deck);
+                console.log(this.points);
+            }else if (this.points >= 17){
+                this.continue = false;
+            }
+        }
+    } 
 }
 
 
@@ -365,9 +391,10 @@ class Dealer extends Player{
         //constructor
             //takes in number of players and number of decks 
             //initialize round - calls initilizePlayer, calls playerBet for each player 
-            //compair - loop through players if bust is false compair to dealer, if highr win true, if lower lose true, if tie tie true. 
+            
         //checkPlayersMoney - loop to check all player money at end of the round (maybe) will go into the bottom one 
         //checkPlayerHands - loop through player hands and check for all the stuff that can happen with 2 cards, for right after deal and run check
+        //compair - loop through players if bust is false compair to dealer, if highr win true, if lower lose true, if tie tie true. 
         //distribute - loop through players if win double bet to player, if tie return bet to player, if bust or lose do nothing if outOfMoney is true then the player is out and something will happen  
         //playerPlay - while player continue is true offer to hit or stay and stuff and hold the jquery for the buttons
         //split - will run play loop for player twice 
