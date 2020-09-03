@@ -1,5 +1,5 @@
 //tsudocode
-const values = ["2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K", "A"];
+const values = ["2", "3", "4", "5", "6", "7", "8", "9", "t", "j", "q", "k", "a"];
 const suits = ["d", "c", "h", "s"];
 //card class
     //value string 
@@ -23,7 +23,7 @@ class Card  {
         this.faceUp = !this.faceUp;
     }
     valueOf(){ 
-        const trueValues = {"2":2, "3":3, "4":4, "5":5, "6":6, "7":7, "8":8, "9":9, "T":10, "J":10, "Q":10, "K":10, "A":11}
+        const trueValues = {"2":2, "3":3, "4":4, "5":5, "6":6, "7":7, "8":8, "9":9, "t":10, "j":10, "q":10, "k":10, "a":11}
         return trueValues[this.value];
     }
 }
@@ -245,7 +245,7 @@ class Player {
     checkAce(){
         let counter = 0;
         for(let i = 0; i < this.hand.length; i++){
-            if(this.hand[i].value === 'A') counter++;
+            if(this.hand[i].value === 'a') counter++;
         }
         this.aceCount = counter;
         if(this.aceCount >= 1) this.hasAce = true;
@@ -269,7 +269,7 @@ class Player {
         if(this.aceChangeCount >=1) this.points - 10*this.aceChangeCount;
     }
     checkNatural(){
-        if((this.hand[0].valueOf() === 10||this.hand[1].valueOf() === 10) && (this.hand[0].value === 'A' || this.hand[1].value === 'A')){ //could use check ace so its a little redundant 
+        if((this.hand[0].valueOf() === 10||this.hand[1].valueOf() === 10) && (this.hand[0].value === 'a' || this.hand[1].value === 'a')){ //could use check ace so its a little redundant 
             this.hasNatural = true;
             return true;
         } 
