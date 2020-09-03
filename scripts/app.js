@@ -1,6 +1,6 @@
 //tsudocode
 const values = ["2", "3", "4", "5", "6", "7", "8", "9", "t", "j", "q", "k", "a"];
-const suits = ["d", "c", "h", "s"];
+const suits = ["diamonds", "clubs", "hearts", "spades"];
 //card class
     //value string 
     //suit  string 
@@ -424,7 +424,7 @@ class Game {
         this.players = [];
         if(numPlay > 3) numPlay = 3;
         for(let i = 0; i < numPlay; i++){
-            this.players.push(new Player());
+            this.players.push(new Player(`player${i + 1}`));
         }
     }
     
@@ -541,7 +541,7 @@ playGame() {
 }
 }    
 const makeGame = function(players = 1, decks = 1){
-    game = new Game(1);
+    game = new Game(2);
     game.playGame()
 }
 $('#gameStart').on('click', makeGame);
