@@ -209,8 +209,8 @@ class Player {
         return false;
     }
     
-    makeBet(num,count, game){
-        const min = num
+    makeBet(game){
+        const min = game.minBet;
         let done = false; 
         //css stuff mostly
         const select25 = () => {
@@ -223,6 +223,9 @@ class Player {
         const select100 = () => {
             this.bet += 100;
         }
+        const restart = () => {
+            this.bet = 0;
+        }
         const finishbet = (e,num = min) => {
             console.log(num);
             if (this.bet >= num && this.checkChips(this.bet)){
@@ -230,6 +233,7 @@ class Player {
                 $('#bet50').remove();
                 $('#bet100').remove();
                 $(`#makeBet`).remove();
+                $('#restart').remove();
                 game.deal(game.deck);
                 // return count++;
                 console.log('do i get here?');
@@ -242,14 +246,17 @@ class Player {
                 alert(`${this.name} hasn't met the required bet`);
             }
         }
-        $('body').append($(`<button class="test" id="bet25">Bet 25</button>`));
+        $('body').append($(`<div id="buttons"></div>`));
+        $('#buttons').append($(`<button class="test" id="bet25">Bet 25</button>`));
         $('#bet25').on('click',select25);
-        $('body').append($(`<button class="test" id="bet50">Bet 50</button>`));
+        $('#buttons').append($(`<button class="test" id="bet50">Bet 50</button>`));
         $('#bet50').on('click',select50);
-        $('body').append($(`<button class="test" id="bet100">Bet 100</button>`));
+        $('#buttons').append($(`<button class="test" id="bet100">Bet 100</button>`));
         $('#bet100').on('click',select100);
-        $('body').append($(`<button class="test" id="makeBet">Place Bet</button>`));
+        $('#buttons').append($(`<button class="test" id="makeBet">Place Bet</button>`));
         $('#makeBet').on('click',finishbet);
+        $('#buttons').append($(`<button class="test" id="restart">Replace Bet</button>`));
+        $('#restart').on('click',restart);
     
     
     }
@@ -368,7 +375,7 @@ class Player {
     }
     //lose - delets players bet adds no money 
     lose(){
-        this.chipe -= this.bet;
+        this.chips -= this.bet;
     }
     //tie - returns bet money 
     tie(){
@@ -382,12 +389,12 @@ class Player {
         }
     }
     play(game) {
-        $('body').append($(`<button class="test" id="hit">Hit</button>`));
+        $('#buttons').append($(`<button class="test" id="hit">Hit</button>`));
         $('#hit').on('click',() => {this.hit(game)});
-        $('body').append($(`<button class="test" id="stand">Stand</button>`));
+        $('#buttons').append($(`<button class="test" id="stand">Stand</button>`));
         $('#stand').on('click', () => {this.stand(game)});
         if (this.canDouble){
-            $('body').append($(`<button class="test" id="doubleDown">DoubleDown</button>`));
+            $('#buttons').append($(`<button class="test" id="doubleDown">DoubleDown</button>`));
             $('#doubleDown').on('click', () => {this.doubleDown(game)});
         }
         
@@ -474,15 +481,16 @@ class Game {
         }
     }
     playerBet(){
-        let count = 0;
-    /*  while(true){
+        //let count = 0;
+        /* while(true){
         if(count < this.players.length) count += this.players[count].makeBet(this.minBet,count);
         if(count >= this.players.length) break;
-        } */
+        } 
         count += this.players[0].makeBet(this.minBet,count, this);
         console.log(`got here ${count}`);
-        if(count >= this.players.length) this.deal(this.deck);
-    }
+        if(count >= this.players.length) this.deal(this.deck); */
+        this.players[0].makeBet(this);
+    } 
     
     initailizeRound(){
         $('body').empty();
@@ -528,6 +536,8 @@ class Game {
         console.log("players play was called");
     }
     allDiscard(){
+        $('body').append($(`<button class="test" id="playround">play another round</button>`));
+        $('#playround').on('click',this.initailizeRound());
         this.players.forEach(player =>{
             player.discards(this.deck);
         })
