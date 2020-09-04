@@ -49,16 +49,12 @@ class Deck {
     constructor(n = 1){
         this.cards = [];
         this.discards = [];
+        $('body').append($(`<div class="playingCards"></div>`))
+        $('.playingCards');
         for(let j = 0; j < n; j++){
             for(let i = 0; i < suits.length; i++){
                 for(let j = 0; j < values.length; j++){
                         this.discards.push(new Card(values[j],suits[i]));
-                        //make cards here 
-                        const card = this.discards[this.discards.length -1];
-                        $('.playingCards').append($(`<div class="card rank-${card.toNumber()} ${card.suit}">
-                            <span class="rank">${card.value.toUpperCase()}</span>
-                            <span class="suit">&${card.suit};</span>
-                            </div>`));
                 }
             }
         }
@@ -193,6 +189,7 @@ class Player {
         this.hand.push(deck.removeCard());
         this.hand[this.hand.length - 1].faceUp = face;
         //transition to hand i think would happen here  
+        $(`.${this.name} hand`).append($(`.deck:first-child`))
     }
     giveCard(deck){
         deck.addToDiscard(this.hand.pop())
@@ -297,7 +294,7 @@ class Player {
             counter+= this.hand[i].valueOf();
         }
         this.points = counter;
-        if(this.aceChangeCount >=1) this.points - 10*this.aceChangeCount;
+        if(this.aceChangeCount >=1) this.points -= 10*this.aceChangeCount;
     }
     checkNatural(){
         if((this.hand[0].valueOf() === 10||this.hand[1].valueOf() === 10) && (this.hand[0].value === 'a' || this.hand[1].value === 'a')){ //could use check ace so its a little redundant 
@@ -323,6 +320,9 @@ class Player {
         }if (this.points === 21){
             this.continue = false;
         }
+        this.hand.forEach(card =>{
+            console.log(`${this.name} has ${card.value}`);
+        })
     }
     checkBegining(){
         this.checkDouble();
@@ -410,7 +410,7 @@ class Player {
             //dealerPlay
 class Dealer extends Player{
 
-    constructor(name = 'BeanMan'){
+    constructor(name = 'dealer'){
         super(name,5000000);
         this.hasFirstTenCard = false;
     }
@@ -467,17 +467,17 @@ class Dealer extends Player{
         //play round - initializeRound dealer deals and the players play (loop through the players) compair and distribute at the end 
         //playGame - creates players and dealer and creats how ever many decks the user wants 
         
-class Game {
+        class Game {
     constructor(numPlay, numDeck = 1){
         this.willQuit = false;
         this.minBet = 25;
-        this.deck = new Deck(numDeck)
+        this.dealer = new Dealer("dealer");
+        this.deck = new Deck(numDeck);
         this.deck.shuffle();
-        this.dealer = new Dealer("StringCheese");
         this.players = [];
         if(numPlay > 3) numPlay = 3;
         for(let i = 0; i < numPlay; i++){
-            this.players.push(new Player(`player${i + 1}`));
+            this.players.push(new Player('player'));
         }
     }
     playerBet(){
@@ -499,8 +499,27 @@ class Game {
         })
         // this.players[0].makeBet(this.minBet);
         this.dealer.initailizePlayer();
+        this.makeCards();
         this.playerBet();
+        
     
+    }
+    makeCards(){
+        $('body').append($(`<div class="playingCards"></div>`));
+        $('.playingCards').append($(`<ul class="deck"></ul>`));
+        this.deck.cards.forEach(card => {
+            $('.deck').append($(`<li class="card back">
+                            <span class="rank">${card.value.toUpperCase()}</span>
+                            <span class="suit">&${card.suit};</span>
+                            </li>`));
+        })
+        this.makePlayers();
+    }
+    makePlayers(){
+        $('.playingCards').append($('<div class="player"></div>'));
+        $('.player').append($('<ul class="hand"></ul>'));
+        $('.playingCards').append($('<div class="dealer"></div>'));
+        $('.dealer').append($('<ul class="hand"></ul>'));
     }
 
     deal(){
@@ -533,7 +552,6 @@ class Game {
     playersPlay(){
         this.players[0].play(this);
             
-        console.log("players play was called");
     }
     allDiscard(){
         $('body').append($(`<button class="test" id="playround">play another round</button>`));
