@@ -1,6 +1,6 @@
 //tsudocode
 const values = ["2", "3", "4", "5", "6", "7", "8", "9", "t", "j", "q", "k", "a"];
-const suits = ["diamonds", "clubs", "hearts", "spades"];
+const suits = ["diams", "clubs", "hearts", "spades"];
 //card class
     //value string 
     //suit  string 
@@ -26,6 +26,9 @@ class Card  {
         const trueValues = {"2":2, "3":3, "4":4, "5":5, "6":6, "7":7, "8":8, "9":9, "t":10, "j":10, "q":10, "k":10, "a":11}
         return trueValues[this.value];
     }
+    toNumber(){
+        if(!isNaN(this.value)) return parseInt(this.value, 10);
+    }
 }
 
 
@@ -50,6 +53,12 @@ class Deck {
             for(let i = 0; i < suits.length; i++){
                 for(let j = 0; j < values.length; j++){
                         this.discards.push(new Card(values[j],suits[i]));
+                        //make cards here 
+                        const card = this.discards[this.discards.length -1];
+                        $('.playingCards').append($(`<div class="card rank-${card.toNumber()} ${card.suit}">
+                            <span class="rank">${card.value.toUpperCase()}</span>
+                            <span class="suit">&${card.suit};</span>
+                            </div>`));
                 }
             }
         }
@@ -200,12 +209,13 @@ class Player {
         return false;
     }
     
-    makeBet(num){
-
+    makeBet(num,count, game){
+        const min = num
         let done = false; 
         //css stuff mostly
         const select25 = () => {
             this.bet += 25;
+
         }
         const select50 = () => {
             this.bet += 50;
@@ -213,9 +223,17 @@ class Player {
         const select100 = () => {
             this.bet += 100;
         }
-        const finishbet = () => {
+        const finishbet = (e,num = min) => {
+            console.log(num);
             if (this.bet >= num && this.checkChips(this.bet)){
-                done = true;
+                $('#bet25').remove();
+                $('#bet50').remove();
+                $('#bet100').remove();
+                $(`#makeBet`).remove();
+                game.deal(game.deck);
+                // return count++;
+                console.log('do i get here?');
+
             }else if(!this.checkChips(this.bet)){
                 alert(`${this.name} doesn't have enough chips for that bet`);
                 
@@ -224,12 +242,18 @@ class Player {
                 alert(`${this.name} hasn't met the required bet`);
             }
         }
-        while(!done){
-            //make buttons appear and work
-            done = true;
-        }
-        this.bet = num; //only for testing
+        $('body').append($(`<button class="test" id="bet25">Bet 25</button>`));
+        $('#bet25').on('click',select25);
+        $('body').append($(`<button class="test" id="bet50">Bet 50</button>`));
+        $('#bet50').on('click',select50);
+        $('body').append($(`<button class="test" id="bet100">Bet 100</button>`));
+        $('#bet100').on('click',select100);
+        $('body').append($(`<button class="test" id="makeBet">Place Bet</button>`));
+        $('#makeBet').on('click',finishbet);
+    
+    
     }
+
 
     betLost(){
         this.chips -= this.bet;
@@ -298,32 +322,35 @@ class Player {
         this.checkSplit();
         this.checkNatural();
         this.check();
-        console.log(`${this.name} has ${this.points} points and ${this.hand}`);
+        console.log(`${this.name} has ${this.points} points`);
     }
     finalCheck(game){
         this.checkChips(game.minBet, true);
         console.log('thisworked maybe');
     }
 
-    hit(deck){
-        this.takeCard(deck);
+    hit(game){
+        this.takeCard(game.deck);
         this.check();
-        console.log(`${this.name} has ${this.points} points and ${this.hand}`);
+        console.log(`${this.name} has ${this.points} points`);
+        if(this.bust) game.dealer.dealerPlay(game); 
     }
 
-    stand(){
+    stand(game){
         this.check();
         this.continue = false;
-        console.log(`${this.name} has ${this.points} points and ${this.hand}`);
+        console.log(`${this.name} has ${this.points} points`);
+        game.dealer.dealerPlay(game); 
     }
 
-    doubleDown(deck){
-        this.takeCard(deck);
+    doubleDown(game){
+        this.takeCard(game.deck);
         this.bet *= 2;
         this.continue = false;
         this.didDouble = true;
         this.check();
-        console.log(`${this.name} has ${this.points} points and ${this.hand}`);
+        console.log(`${this.name} has ${this.points} points`);
+        game.dealer.dealerPlay(game); 
 
     }
 
@@ -354,6 +381,17 @@ class Player {
             this.giveCard(deck);
         }
     }
+    play(game) {
+        $('body').append($(`<button class="test" id="hit">Hit</button>`));
+        $('#hit').on('click',() => {this.hit(game)});
+        $('body').append($(`<button class="test" id="stand">Stand</button>`));
+        $('#stand').on('click', () => {this.stand(game)});
+        if (this.canDouble){
+            $('body').append($(`<button class="test" id="doubleDown">DoubleDown</button>`));
+            $('#doubleDown').on('click', () => {this.doubleDown(game)});
+        }
+        
+    }
 }
 //dealer class extends player
             //constructor takes nothing 
@@ -376,21 +414,29 @@ class Dealer extends Player{
     checkTenCard(){
         if(this.hand[0].valueOf() === 10) this.hasFirstTenCard = true;
     }
-    checkBegining(){
+    checkBegining(game){
         super.checkNatural();
         this.checkTenCard();
         super.check();
+        if (this.hasFirstTenCard && this.hasAce) this.hand[1].faceUp = true;
+        game.playersPlay();
     }
-    dealerPlay(deck){
+    hit(game){
+        this.takeCard(game.deck);
+        this.check();
+        console.log(`${this.name} has ${this.points} points`);
+    }
+    dealerPlay(game){
         this.hand[1].faceUp = true;
         while(this.continue === true){
             if(this.points < 17){ 
-                this.hit(deck);
+                this.hit(game);
                 console.log(this.points);
             }else if (this.points >= 17){
                 this.continue = false;
             }
         }
+        game.compair();
     } 
 }
 
@@ -427,13 +473,26 @@ class Game {
             this.players.push(new Player(`player${i + 1}`));
         }
     }
+    playerBet(){
+        let count = 0;
+    /*  while(true){
+        if(count < this.players.length) count += this.players[count].makeBet(this.minBet,count);
+        if(count >= this.players.length) break;
+        } */
+        count += this.players[0].makeBet(this.minBet,count, this);
+        console.log(`got here ${count}`);
+        if(count >= this.players.length) this.deal(this.deck);
+    }
     
     initailizeRound(){
+        $('body').empty();
         this.players.forEach(player =>{
             player.initailizePlayer();
-            player.makeBet(this.minBet);
         })
+        // this.players[0].makeBet(this.minBet);
         this.dealer.initailizePlayer();
+        this.playerBet();
+    
     }
 
     deal(){
@@ -444,33 +503,31 @@ class Game {
             if(i === 1) this.dealer.takeCard(this.deck, false);
             else this.dealer.takeCard(this.deck);
         }
+        this.playersFirstCheck();
+        
+        
     }
 
     playersFirstCheck(){
         this.players.forEach(player =>{
             player.checkBegining();
         })
-        this.dealer.checkBegining();
+        this.dealer.checkBegining(this);
     
     }
 
     playersLastCheck(){
         this.players.forEach(player =>{
-            player.finalCheck(this);
+                player.finalCheck(this);
         })
     }
 
     playersPlay(){
-        this.players.forEach(player =>{
-            while(player.continue){
-                //press buttons
-                console.log("players play was called");
-                player.continue = false
-            }
-        })
-        this.dealer.dealerPlay(this.deck);
+        this.players[0].play(this);
+            
+        console.log("players play was called");
     }
-    alldiscard(){
+    allDiscard(){
         this.players.forEach(player =>{
             player.discards(this.deck);
         })
@@ -500,6 +557,7 @@ class Game {
                 console.log('Push');
             }
         })
+        this.distribute();
     }
 
     distribute(){
@@ -514,19 +572,10 @@ class Game {
                 player.lose();
             }else console.log('how did i get here');
         })
+        this.allDiscard();
     }
     //everything up to here deffinetly works 
-playRound() {
-    this.initailizeRound();
-    this.deal(this.deck);
-    this.playersFirstCheck();
-    if (this.dealer.hasFirstTenCard && this.dealer.hasAce) this.dealer.hand[1].faceUp = true;
-    this.playersPlay();
-    this.dealer.dealerPlay(this.deck);
-    this.compair();
-    this.distribute();
-    this.alldiscard();
-}
+
 quit(){
     this.willQuit = true;
     console.log('hello beans');
@@ -534,26 +583,21 @@ quit(){
 
 playGame() {
     
-    while(!this.willQuit){
-        //this.playRound();
-        this.willQuit = true;
-    }
+    
+    this.initailizeRound();
+    $('body').append($(`<button class="test" id="playround">play another round</button>`));
+    $('#playround').on('click',this.initailizeRound());
+
 }
 }    
 const makeGame = function(players = 1, decks = 1){
-    game = new Game(2);
+    game = new Game(1);
     game.playGame()
 }
 $('#gameStart').on('click', makeGame);
 
 // $('body').empty();
 /* $('#quit').on('click',this.quit);
-$('body').append($(`<button class="test" id="bet25">Bet 25</button>`));
-$('body').append($(`<button class="test" id="bet50">Bet 50</button>`));
-$('body').append($(`<button class="test" id="bet100">Bet 100</button>`));
-$('body').append($(`<button class="test" id="makeBet">Place Bet</button>`));
-$('body').append($(`<button class="test" id="hit">Hit</button>`));
-$('body').append($(`<button class="test" id="stand">Stand</button>`));
-$('body').append($(`<button class="test" id="doubleDown">DoubleDown</button>`));
-$('body').append($(`<button class="test" id="quit">Quit</button>`));
+
+
  */
